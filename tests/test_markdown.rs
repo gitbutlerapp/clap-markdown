@@ -58,8 +58,6 @@ Options:
 
 This document contains the help content for the `my-program-display-name` command-line program.
 
-## This program does things.
-
 **Usage:** `my-program-name [OPTIONS]`
 
 ###### **Options:**
@@ -126,8 +124,6 @@ Options:
 # This program does things.
 
 This document contains the help content for the `my-program-display-name` command-line program.
-
-## This program does things.
 
 **Usage:** `my-program-bin-name [OPTIONS]`
 

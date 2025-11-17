@@ -336,20 +336,12 @@ fn build_command_markdown(
     */
 
     // If this is the root command with no subcommands and no command overview,
-    // use the about text as the header instead of the command name
+    // skip the section header and description since they're already in the document introduction
     let has_subcommands = command.get_subcommands().next().is_some();
     let is_root_command = parent_command_path.is_empty();
     let show_command_overview = options.show_table_of_contents && has_subcommands;
 
-    if is_root_command && !has_subcommands && !show_command_overview {
-        // Use about as the header, long_about as content
-        if let Some(about) = command.get_about() {
-            writeln!(buffer, "## {}\n", about)?;
-        }
-        if let Some(long_about) = command.get_long_about() {
-            writeln!(buffer, "{}\n", long_about)?;
-        }
-    } else {
+    if !(is_root_command && !has_subcommands && !show_command_overview) {
         // Standard behavior: command name as header, about/long_about as content
         writeln!(buffer, "## `{}`\n", command_path.join(" "))?;
 
@@ -649,7 +641,7 @@ fn get_canonical_name(command: &clap::Command) -> String {
         .unwrap_or_else(|| command.get_name().to_owned())
 }
 
-/// Indents non-empty lines. The output always ends with a newline.
+/// Indents non-empty lines, preserving all newlines from the input.
 fn indent(s: &str, first: &str, rest: &str) -> String {
     if s.is_empty() {
         // For consistency. It's easiest to always add a newline at the end, and
@@ -659,7 +651,17 @@ fn indent(s: &str, first: &str, rest: &str) -> String {
     let mut result = String::new();
     let mut first_line = true;
 
-    for line in s.lines() {
+    // Use split_inclusive to preserve information about newlines
+    let mut lines: Vec<&str> = s.split('\n').collect();
+    let ends_with_newline = s.ends_with('\n');
+
+    // If the string ends with \n, split will create an empty string at the end
+    // We want to process all but that final empty string, then add the newline back
+    if ends_with_newline && lines.last() == Some(&"") {
+        lines.pop();
+    }
+
+    for line in lines.iter() {
         if !line.is_empty() {
             result.push_str(if first_line { first } else { rest });
             result.push_str(line);
@@ -667,6 +669,7 @@ fn indent(s: &str, first: &str, rest: &str) -> String {
         }
         result.push('\n');
     }
+
     result
 }
 
