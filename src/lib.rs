@@ -178,7 +178,8 @@ fn write_help_markdown(
     // build_table_of_contents_html(buffer, Vec::new(), command, 0).unwrap();
     // writeln!(buffer, "</ul></div>").unwrap();
 
-    if options.show_table_of_contents {
+    // Only show the command overview if there are subcommands
+    if options.show_table_of_contents && command.get_subcommands().next().is_some() {
         writeln!(buffer, "**Command Overview:**\n").unwrap();
 
         build_table_of_contents_markdown(buffer, Vec::new(), command, 0)
@@ -333,12 +334,30 @@ fn build_command_markdown(
         )
     }
     */
-    writeln!(buffer, "## `{}`\n", command_path.join(" "))?;
 
-    if let Some(long_about) = command.get_long_about() {
-        writeln!(buffer, "{}\n", long_about)?;
-    } else if let Some(about) = command.get_about() {
-        writeln!(buffer, "{}\n", about)?;
+    // If this is the root command with no subcommands and no command overview,
+    // use the about text as the header instead of the command name
+    let has_subcommands = command.get_subcommands().next().is_some();
+    let is_root_command = parent_command_path.is_empty();
+    let show_command_overview = options.show_table_of_contents && has_subcommands;
+
+    if is_root_command && !has_subcommands && !show_command_overview {
+        // Use about as the header, long_about as content
+        if let Some(about) = command.get_about() {
+            writeln!(buffer, "## {}\n", about)?;
+        }
+        if let Some(long_about) = command.get_long_about() {
+            writeln!(buffer, "{}\n", long_about)?;
+        }
+    } else {
+        // Standard behavior: command name as header, about/long_about as content
+        writeln!(buffer, "## `{}`\n", command_path.join(" "))?;
+
+        if let Some(long_about) = command.get_long_about() {
+            writeln!(buffer, "{}\n", long_about)?;
+        } else if let Some(about) = command.get_about() {
+            writeln!(buffer, "{}\n", about)?;
+        }
     }
 
     if let Some(help) = command.get_before_long_help() {
@@ -397,7 +416,20 @@ fn build_command_markdown(
 
             let about = match subcommand.get_about() {
                 Some(about) => about.to_string(),
-                None => String::new(),
+                None => {
+                    // If no about, use the first line of long_about
+                    match subcommand.get_long_about() {
+                        Some(long_about) => {
+                            long_about
+                                .to_string()
+                                .lines()
+                                .next()
+                                .unwrap_or("")
+                                .to_string()
+                        },
+                        None => String::new(),
+                    }
+                },
             };
 
             writeln!(buffer, "* `{title_name}` — {about}",)?;

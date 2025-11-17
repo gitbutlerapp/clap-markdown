@@ -54,17 +54,11 @@ Options:
             &MarkdownOptions::new().show_footer(false)
         ),
         "\
-# Command-Line Help for `my-program-display-name`
+# This program does things.
 
 This document contains the help content for the `my-program-display-name` command-line program.
 
-**Command Overview:**
-
-* [`my-program-display-name`↴](#my-program-display-name)
-
-## `my-program-display-name`
-
-This program does things.
+## This program does things.
 
 **Usage:** `my-program-name [OPTIONS]`
 
@@ -129,17 +123,11 @@ Options:
             &MarkdownOptions::new().show_footer(false)
         ),
         "\
-# Command-Line Help for `my-program-display-name`
+# This program does things.
 
 This document contains the help content for the `my-program-display-name` command-line program.
 
-**Command Overview:**
-
-* [`my-program-display-name`↴](#my-program-display-name)
-
-## `my-program-display-name`
-
-This program does things.
+## This program does things.
 
 **Usage:** `my-program-bin-name [OPTIONS]`
 
